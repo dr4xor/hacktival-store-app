@@ -106,6 +106,74 @@ class _RankingPageState extends State<RankingPage> {
 
                 List<App> appsToShow = apps.where((it) => containsAll(it.tags, filter)).toList();
 
+
+                return CustomScrollView(
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(
+                      child: Card(
+                        margin: EdgeInsets.all(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(child: Text("Check out the top apps of the day!", style: TextStyle(
+                            fontSize: 22
+                          ),)),
+                        ),
+                      ),
+                    ),
+                    SliverList(delegate: SliverChildBuilderDelegate((context, index) {
+                      if(index % 2 == 1) return Divider();
+                      index = (index / 2).floor();
+                      return AppItem(
+                        app: appsToShow[index],
+                        position: index,
+                        onUpvote: () {
+                          _vote(appsToShow[index].id, true);
+                        },
+                        onDownvote: () {
+                          _vote(appsToShow[index].id, false);
+                        },
+                      );
+                    }, childCount: appsToShow.length * 2 - 1), )
+                  ],
+                );
+                return ListView.custom(childrenDelegate: SliverChildListDelegate([
+                  ListView.separated(
+                    itemBuilder: (context, index) {
+                      return AppItem(
+                        app: appsToShow[index],
+                        position: index,
+                        onUpvote: () {
+                          _vote(appsToShow[index].id, true);
+                        },
+                        onDownvote: () {
+                          _vote(appsToShow[index].id, false);
+                        },
+                      );
+                    },
+                    itemCount: appsToShow.length,
+                    separatorBuilder: (_, o) => Divider(),
+                  ),
+                ]));
+                return SliverList(delegate: SliverChildListDelegate([
+                  SliverToBoxAdapter(
+                    child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        return AppItem(
+                          app: appsToShow[index],
+                          position: index,
+                          onUpvote: () {
+                            _vote(appsToShow[index].id, true);
+                          },
+                          onDownvote: () {
+                            _vote(appsToShow[index].id, false);
+                          },
+                        );
+                      },
+                      itemCount: appsToShow.length,
+                      separatorBuilder: (_, o) => Divider(),
+                    ),
+                  ),
+                ]));
                 return ListView.separated(
                   itemBuilder: (context, index) {
                     return AppItem(
@@ -119,7 +187,7 @@ class _RankingPageState extends State<RankingPage> {
                       },
                     );
                   },
-                  itemCount: apps.length,
+                  itemCount: appsToShow.length,
                   separatorBuilder: (_, o) => Divider(),
                 );
               }

@@ -36,7 +36,7 @@ class _AppItemState extends State<AppItem> {
   }
 
   double _getHeightFactor() {
-    return (max(0, 3-widget.position) * 0.1) + 1;
+    return (max(0, 3-widget.position) * 0.2) + 1;
   }
 
   @override
@@ -78,7 +78,9 @@ class _AppItemState extends State<AppItem> {
                       child: Image.network("${entry.icon}=s128", height: 80 * _getHeightFactor(),),
                     ),
                     SizedBox(width: 16,),
-                    Expanded(child: Text(entry.title, maxLines: 3,)),
+                    Expanded(child: Text(entry.title, maxLines: 3, style: TextStyle(
+                      fontSize: (15 * _getHeightFactor())
+                    ),)),
                   ],
                 ),
                 /*Align(
