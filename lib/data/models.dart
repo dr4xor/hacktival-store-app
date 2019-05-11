@@ -4,6 +4,16 @@ class App{
   int score;
   List<Tag> tags;
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is App &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   App({this.id, this.link, this.score, this.tags});
 
   App.fromJson(Map<String, dynamic> json) {
@@ -35,6 +45,18 @@ class Tag {
   String name;
 
   Tag({this.id, this.name});
+
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Tag &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
 
   Tag.fromJson(Map<String, dynamic> json) {
     id = json['id'];

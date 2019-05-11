@@ -14,25 +14,29 @@ class TagChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      children: _chips().toList(),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        children: _chips().toList(),
+      ),
     );
   }
 
 
   Iterable<Widget> _chips() sync*{
+    int i = 0;
     for(Tag tag in tags) {
+      i++;
+      if(i % 2 == 0) {
+        yield Divider();
+      }
       if(editable) {
-        yield FilterChip(
+        yield Chip(
           label: Text(tag.name),
-          onSelected: (enabled) {
-            if(enabled) {
-              var newTags = List.from(tags)..add(tag);
-              onTagsChanged(newTags);
-            } else {
-              var newTags = List.from(tags)..remove(tag);
-              onTagsChanged(newTags);
-            }
+          onDeleted: () {
+            List<Tag> newTags = List.from(tags)..remove(tag);
+            onTagsChanged(newTags);
           },
         );
       } else {

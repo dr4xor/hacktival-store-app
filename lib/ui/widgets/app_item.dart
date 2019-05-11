@@ -45,13 +45,13 @@ class AppItem extends StatelessWidget {
               Text("App name"),
             ],
           ),
-          Align(
+          /*Align(
             alignment: Alignment.centerLeft,
             child: TagChips(
               editable: false,
               tags: app.tags,
             ),
-          )
+          )*/
         ],
       ),
     );
