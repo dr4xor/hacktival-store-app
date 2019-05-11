@@ -5,11 +5,15 @@ import 'package:http/http.dart' as http;
 
 import 'network_response.dart';
 
+DiscoveryNetwork network = DiscoveryNetwork();
+
 class DiscoveryNetwork {
 
+  final String baseUrl = "http://159.69.155.106:8080/";
 
   Future<GetAllAppsResponse> getAllApps() async {
-    http.Response response = await http.get("asdkasjdasdh");
+
+    http.Response response = await http.get("$baseUrl/api/apps");
 
     if(response.statusCode < 200 || response.statusCode > 299) {
       return GetAllAppsResponse(
@@ -38,7 +42,11 @@ class DiscoveryNetwork {
 
   Future<bool> vote(int id, bool up) async {
 
-    http.Response response = await http.get("adasd");
+    http.Response response = await http.post("$baseUrl/api/apps/$id",
+      body: {
+      "isUpVote" : up,
+      }
+    );
 
     if(response.statusCode < 200 || response.statusCode > 299) {
       return false;
@@ -49,7 +57,7 @@ class DiscoveryNetwork {
 
   Future<CreateAppResponse> createApp(String link, List<Tag> tags) async {
 
-    http.Response response = await http.get("adadf");
+    http.Response response = await http.post("$baseUrl/api/apps");
 
 
     if(response.statusCode < 200 || response.statusCode > 299) {

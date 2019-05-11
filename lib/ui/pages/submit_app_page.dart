@@ -86,7 +86,13 @@ class _ConfirmAndChooseTagsPage extends StatelessWidget {
                   ),
                 ),
               ),
-            )
+            ),
+            Spacer(),
+            MaterialButton(
+              onPressed: () {
+              },
+              child: Text("Submit")
+            ),
           ],
         ),
       ),
