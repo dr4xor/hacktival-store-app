@@ -42,14 +42,16 @@ class TagList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var tags = tagsToShow().toList();
-    return ListView.builder(
+    return ListView.separated(
       itemCount: tags.length,
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(tags[index].name),
           onTap: () => onTagSelected(tags[index]),
         );
-      }
+      },
+      separatorBuilder: (_,k) => Divider(),
+
     );
   }
 }

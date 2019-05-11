@@ -70,3 +70,40 @@ class Tag {
     return data;
   }
 }
+
+class PlayStoreEntry {
+  String appId;
+  String title;
+  String icon;
+  String video;
+  String price;
+  String description;
+
+  PlayStoreEntry(
+      {this.appId,
+        this.title,
+        this.icon,
+        this.video,
+        this.price,
+        this.description});
+
+  PlayStoreEntry.fromJson(Map<String, dynamic> json) {
+    appId = json['app_id'];
+    title = json['title'];
+    icon = json['icon'];
+    video = json['video'];
+    price = json['price'];
+    description = json['description'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['app_id'] = this.appId;
+    data['title'] = this.title;
+    data['icon'] = this.icon;
+    data['video'] = this.video;
+    data['price'] = this.price;
+    data['description'] = this.description;
+    return data;
+  }
+}

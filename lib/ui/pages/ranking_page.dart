@@ -1,10 +1,10 @@
-
 import 'package:discovery_store/data/models.dart';
 import 'package:discovery_store/data/network.dart';
 import 'package:discovery_store/data/network_response.dart';
 import 'package:discovery_store/ui/widgets/app_item.dart';
 import 'package:discovery_store/ui/widgets/tag_chips.dart';
 import 'package:discovery_store/ui/widgets/taggable_scaffold.dart';
+import 'package:discovery_store/utils.dart';
 import 'package:flutter/material.dart';
 
 class RankingPage extends StatefulWidget {
@@ -16,13 +16,17 @@ class RankingPage extends StatefulWidget {
 
 class _RankingPageState extends State<RankingPage> {
 
-  bool searching = false;
 
   final TextEditingController textEditingController = TextEditingController();
 
   Set<Tag> filter = Set();
 
   Future<GetAllAppsResponse> allApps;
+
+  bool canOpenTagSelector = false;
+
+  List<Tag> possibleTags;
+
 
   @override
   void initState() {
@@ -32,61 +36,32 @@ class _RankingPageState extends State<RankingPage> {
     });
 
     allApps = network.getAllApps();
+    network.getPossibleTags().then((it) {
+      if(!it.success) return;
+      possibleTags = it.tags;
+      setState(() {
+        canOpenTagSelector = true;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: getAppBarContent(),
+        title: Text("Home"),
         actions: <Widget>[
-          IconButton(icon: Icon(searching? Icons.delete : Icons.search), onPressed: () {
-            setState(() {
-              searching = true;
-            });
-          })
+          canOpenTagSelector? IconButton(icon: Icon(Icons.search), onPressed: () async {
+            Tag tag = await Navigator.push<Tag>(context, FadeRoute<Tag>(builder: (context) => _SelectTagPage(
+              possibleTags: possibleTags,
+            )));
+            if(tag == null) return;
+            filter.add(tag);
+            setState(() {});
+          }): SizedBox()
         ],
       ),
-      body: getContent(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed("submit_app");
-        },
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget getAppBarContent() {
-    if(searching) {
-      return TextField(
-        controller: textEditingController,
-      );
-    } else {
-      return Text("Home");
-    }
-  }
-
-  _vote(int id, bool upvote) {
-    network.vote(id, upvote);
-  }
-
-  Widget getContent() {
-    if(searching) {
-      return TagList(
-        possibleTags: [
-          Tag(id: 3, name: "Hallo"),
-        ],
-        input: textEditingController.text,
-        onTagSelected: (tag) {
-          setState(() {
-            searching = false;
-          });
-          filter.add(tag);
-        },
-      );
-    } else {
-      return Column(
+      body: Column(
         children: <Widget>[
           TagChips(
             tags: filter.toList(),
@@ -102,7 +77,13 @@ class _RankingPageState extends State<RankingPage> {
               future: allApps,
               builder: (context, snapshot) {
 
-                if(!snapshot.hasData || !snapshot.data.success) {
+                if(!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if(!snapshot.data.success) {
                   return Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -122,35 +103,94 @@ class _RankingPageState extends State<RankingPage> {
                   );
                 }
                 List<App> apps = snapshot.requireData.apps;
-                return ListView(
-                  children: List<int>.generate(apps.length, (i) => i)
-                      .where((index) => containsAny(apps[index].tags, filter))
-                      .map((it) {
+
+                List<App> appsToShow = apps.where((it) => containsAll(it.tags, filter)).toList();
+
+                return ListView.separated(
+                  itemBuilder: (context, index) {
                     return AppItem(
-                      app: apps[it],
-                      position: it,
+                      app: appsToShow[index],
+                      position: index,
                       onUpvote: () {
-                        _vote(apps[it].id, true);
+                        _vote(appsToShow[index].id, true);
                       },
                       onDownvote: () {
-                        _vote(apps[it].id, false);
+                        _vote(appsToShow[index].id, false);
                       },
                     );
-                  }).toList(),
+                  },
+                  itemCount: apps.length,
+                  separatorBuilder: (_, o) => Divider(),
                 );
               }
             ),
           ),
         ],
-      );
-    }
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed("submit_app");
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  _vote(int id, bool upvote) {
+    network.vote(id, upvote);
   }
 
 
-  bool containsAny<E>(Iterable<E> list, Iterable<E> filter) {
+  bool containsAll<E>(Iterable<E> list, Iterable<E> filter) {
     for(E e in filter) {
       if(!list.contains(e)) return false;
     }
    return true;
   }
+
 }
+
+
+class _SelectTagPage extends StatefulWidget {
+
+
+  _SelectTagPage({Key key, this.possibleTags}) : super(key: key);
+
+  final List<Tag> possibleTags;
+
+  @override
+  __SelectTagPageState createState() => __SelectTagPageState();
+}
+
+class __SelectTagPageState extends State<_SelectTagPage> {
+  final TextEditingController textEditingController = TextEditingController();
+
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController.addListener(() {setState(() {});});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: TextField(
+          controller: textEditingController,
+          decoration: InputDecoration(
+            hintText: "Start typing a tag"
+          ),
+        ),
+      ),
+      body: TagList(
+        possibleTags: widget.possibleTags,
+        input: textEditingController.text,
+        onTagSelected: (tag) {
+          Navigator.of(context).pop(tag);
+        },
+      ),
+    );
+  }
+}
+

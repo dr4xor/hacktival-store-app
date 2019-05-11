@@ -1,3 +1,6 @@
+import 'package:discovery_store/data/models.dart';
+import 'package:discovery_store/data/network.dart';
+import 'package:discovery_store/data/network_response.dart';
 import 'package:flutter/material.dart';
 
 class SubmitAppPage extends StatelessWidget {
@@ -43,11 +46,22 @@ class SubmitAppPage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
+          String text = textEditingController.text;
+
+          ParseAppResponse response = await scraper.getAppInfo(text);
+          if(!response.success || response.playStoreEntry == null) {
+            Scaffold.of(context).showSnackBar(SnackBar(content: Text("Something went wrong (Yes we actually did"
+                " error handling")));
+            return;
+          }
+
+
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) {
               return _ConfirmAndChooseTagsPage(
-                appLink: textEditingController.text,
+                entry: response.playStoreEntry,
+                appLink: text,
               );
             }
           ));
@@ -60,9 +74,10 @@ class SubmitAppPage extends StatelessWidget {
 
 class _ConfirmAndChooseTagsPage extends StatelessWidget {
 
-  const _ConfirmAndChooseTagsPage({Key key, this.appLink}) : super(key: key);
+  const _ConfirmAndChooseTagsPage({Key key, this.appLink, this.entry}) : super(key: key);
 
   final String appLink;
+  final PlayStoreEntry entry;
 
 
   @override
@@ -87,11 +102,24 @@ class _ConfirmAndChooseTagsPage extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: 16,),
+            Row(
+              children: <Widget>[
+                Image.network("${entry.icon}=s128"),
+                SizedBox(width: 16,),
+                Text(entry.title),
+              ],
+            ),
+            SizedBox(height: 16,),
+            Text(Uri.decodeFull(entry.description).replaceAll("<br/>", "\n"), maxLines: 8, overflow: TextOverflow.ellipsis,),
             Spacer(),
-            MaterialButton(
-              onPressed: () {
-              },
-              child: Text("Submit")
+            SizedBox(
+              width: double.infinity,
+              child: RaisedButton(
+                onPressed: () {
+                },
+                child: Text("Submit")
+              ),
             ),
           ],
         ),

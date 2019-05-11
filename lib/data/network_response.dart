@@ -22,3 +22,24 @@ class CreateAppResponse {
   final App app;
 
 }
+
+
+class ParseAppResponse {
+
+  ParseAppResponse({this.playStoreEntry, this.success});
+
+  final PlayStoreEntry playStoreEntry;
+  final bool success;
+
+
+}
+
+
+class GetAllTagsResponse {
+
+  GetAllTagsResponse({this.tags, this.success});
+
+  final List<Tag> tags;
+  final bool success;
+
+}
