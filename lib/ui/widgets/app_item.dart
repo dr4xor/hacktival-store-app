@@ -88,7 +88,7 @@ class _AppItemState extends State<AppItem> {
                         SizedBox(
                           width: 16,
                         ),
-                        Card(
+                        Container(
                           child: Hero(
                             tag: widget.app.id,
                             child: Image.network(

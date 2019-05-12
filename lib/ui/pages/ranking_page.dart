@@ -82,6 +82,7 @@ class _RankingPageState extends State<RankingPage> {
         SliverAppBar(
           floating: true,
           snap: true,
+          leading: Icon(Icons.shop),
           title: Text("Discovery Store",),
           actions: <Widget>[
             IconButton(

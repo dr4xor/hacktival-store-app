@@ -28,7 +28,7 @@ class DetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(entry.title),
+        title: Text("Details"),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.share),

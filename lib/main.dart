@@ -72,10 +72,11 @@ class _MyAppState extends State<MyApp> {
         return TagHolder(
           tags: snapshot.requireData.tags,
           child: MaterialApp(
-            title: 'Flutter Demo',
+            title: 'Discovery Store',
             theme: new ThemeData(
               brightness: Brightness.dark,
               primarySwatch: Colors.blue,
+
             ),
             home: RankingPage(),
             routes: {
