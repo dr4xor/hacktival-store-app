@@ -25,23 +25,24 @@ class TagChips extends StatelessWidget {
 
 
   Iterable<Widget> _chips() sync*{
-    int i = 0;
     for(Tag tag in tags) {
-      i++;
-      if(i % 2 == 0) {
-        yield Divider();
-      }
       if(editable) {
-        yield Chip(
-          label: Text(tag.name),
-          onDeleted: () {
-            List<Tag> newTags = List.from(tags)..remove(tag);
-            onTagsChanged(newTags);
-          },
+        yield Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Chip(
+            label: Text(tag.name),
+            onDeleted: () {
+              List<Tag> newTags = List.from(tags)..remove(tag);
+              onTagsChanged(newTags);
+            },
+          ),
         );
       } else {
-        yield Chip(
-          label: Text(tag.name),
+        yield Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Chip(
+            label: Text(tag.name),
+          ),
         );
       }
     }

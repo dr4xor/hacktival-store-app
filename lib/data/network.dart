@@ -6,7 +6,33 @@ import 'package:http/http.dart' as http;
 import 'network_response.dart';
 
 DiscoveryNetwork network = DiscoveryNetwork();
-PlayScraper scraper = PlayScraper();
+PlayScraper _scraper = PlayScraper();
+
+Repository repository = Repository(
+  scraper: _scraper
+);
+
+class Repository {
+
+  final PlayScraper scraper;
+
+  Repository({this.scraper});
+
+  final Map<String, ParseAppResponse> _cache = {};
+
+
+  Future<ParseAppResponse> getAppInfo(String link) async {
+    if(_cache.containsKey(link)) {
+      return _cache[link];
+    }
+
+    ParseAppResponse response = await scraper.getAppInfo(link);
+    _cache[link] = response;
+    return response;
+  }
+
+
+}
 
 class DiscoveryNetwork {
 
@@ -58,7 +84,15 @@ class DiscoveryNetwork {
 
   Future<CreateAppResponse> createApp(String link, List<Tag> tags) async {
 
-    http.Response response = await http.post("$baseUrl/api/apps");
+    http.Response response = await http.post("$baseUrl/api/apps",
+      body: json.encode({
+        "link": link,
+        "tags": tags.map((it) => it.id).toList(),
+      }),
+      headers: {
+        "Content-type": "application/json; charset=utf-8"
+      }
+    );
 
 
     if(response.statusCode < 200 || response.statusCode > 299) {
@@ -78,35 +112,6 @@ class DiscoveryNetwork {
   Future<GetAllTagsResponse> getPossibleTags() async {
 
 
-    return GetAllTagsResponse(
-      success: true,
-      tags: [
-        Tag(
-          id: 0,
-          name: "Gaming"
-        ),
-        Tag(
-          id: 1,
-          name: "Beauty"
-        ),
-        Tag(
-          id: 2,
-          name: "Top down"
-        ),
-        Tag(
-          id: 3,
-          name: "Pixel"
-        ),
-        Tag(
-          id: 4,
-          name: "Task management"
-        ),
-        Tag(
-          id: 5,
-          name: "Social Media"
-        ),
-      ],
-    );
     http.Response response = await http.get("$baseUrl/api/tags");
 
 

@@ -7,16 +7,14 @@ import 'package:discovery_store/ui/widgets/taggable_scaffold.dart';
 import 'package:discovery_store/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../main.dart';
+
 class RankingPage extends StatefulWidget {
-
-
   @override
   _RankingPageState createState() => _RankingPageState();
 }
 
 class _RankingPageState extends State<RankingPage> {
-
-
   final TextEditingController textEditingController = TextEditingController();
 
   Set<Tag> filter = Set();
@@ -25,8 +23,6 @@ class _RankingPageState extends State<RankingPage> {
 
   bool canOpenTagSelector = false;
 
-  List<Tag> possibleTags;
-
 
   @override
   void initState() {
@@ -34,129 +30,127 @@ class _RankingPageState extends State<RankingPage> {
     textEditingController.addListener(() {
       setState(() {});
     });
-
     allApps = network.getAllApps();
-    network.getPossibleTags().then((it) {
-      if(!it.success) return;
-      possibleTags = it.tags;
-      setState(() {
-        canOpenTagSelector = true;
-      });
-    });
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Home"),
-        actions: <Widget>[
-          canOpenTagSelector? IconButton(icon: Icon(Icons.search), onPressed: () async {
-            Tag tag = await Navigator.push<Tag>(context, FadeRoute<Tag>(builder: (context) => _SelectTagPage(
-              possibleTags: possibleTags,
-            )));
-            if(tag == null) return;
-            filter.add(tag);
-            setState(() {});
-          }): SizedBox()
-        ],
-      ),
       body: Column(
         children: <Widget>[
-          TagChips(
-            tags: filter.toList(),
-            editable: true,
-            onTagsChanged: (it) {
-              setState(() {
-                filter = it.toSet();
-              });
-            },
-          ),
           Expanded(
             child: FutureBuilder<GetAllAppsResponse>(
-              future: allApps,
-              builder: (context, snapshot) {
+                future: allApps,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                if(!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+                  if (!snapshot.data.success) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                              "Ups, something went wrong (yes we did error handling)"),
+                          MaterialButton(
+                            onPressed: () {
+                              setState(() {
+                                allApps = network.getAllApps();
+                              });
+                            },
+                            child: Text("Try again"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  List<App> apps = snapshot.requireData.apps;
 
-                if(!snapshot.data.success) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text("Ups, something went wrong (yes we did error handling)"),
-                        MaterialButton(
-                          onPressed: () {
-                            setState(() {
-                              allApps = network.getAllApps();
-                            });
-                          },
-                          child: Text("Try again"),
-                        ),
+                  List<App> appsToShow =
+                      apps.where((it) => containsAll(it.tags, filter)).toList();
 
-                      ],
-                    ),
-                  );
-                }
-                List<App> apps = snapshot.requireData.apps;
-
-                List<App> appsToShow = apps.where((it) => containsAll(it.tags, filter)).toList();
-
-
-                return CustomScrollView(
-                  slivers: <Widget>[
-                    SliverToBoxAdapter(
-                      child: Card(
-                        margin: EdgeInsets.all(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Center(child: Text("Check out the top apps of the day!", style: TextStyle(
-                            fontSize: 22
-                          ),)),
+                  return CustomScrollView(
+                    slivers: <Widget>[
+                      SliverAppBar(
+                        backgroundColor: Colors.white,
+                        floating: true,
+                        snap: true,
+                        title: Text("Home", style: TextStyle(color: Colors.black),),
+                        actions: <Widget>[
+                          canOpenTagSelector
+                              ? IconButton(
+                                  icon: Icon(Icons.search, color: Colors.black,),
+                                  onPressed: () async {
+                                    Tag tag = await Navigator.push<Tag>(
+                                        context,
+                                        FadeRoute<Tag>(
+                                            builder: (context) =>
+                                                _SelectTagPage(
+                                                  possibleTags: TagHolder.getTags(context),
+                                                )));
+                                    if (tag == null) return;
+                                    filter.add(tag);
+                                    setState(() {});
+                                  })
+                              : SizedBox()
+                        ],
+                        bottom: PreferredSize(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                              child: TagChips(
+                                tags: filter.toList(),
+                                editable: true,
+                                onTagsChanged: (it) {
+                                  setState(() {
+                                    filter = it.toSet();
+                                  });
+                                },
+                              ),
+                            ),
+                            preferredSize: Size(0, filter.isEmpty? 0:56)),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all()
+                          ),
+                          height: 64,
+                          alignment: Alignment.center,
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                          child: Text(
+                            "Check out the top apps of the day!",
+                            style: TextStyle(
+                              fontSize: 22,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    SliverList(delegate: SliverChildBuilderDelegate((context, index) {
-                      if(index % 2 == 1) return Divider();
-                      index = (index / 2).floor();
-                      return AppItem(
-                        app: appsToShow[index],
-                        position: index,
-                        onUpvote: () {
-                          _vote(appsToShow[index].id, true);
-                        },
-                        onDownvote: () {
-                          _vote(appsToShow[index].id, false);
-                        },
-                      );
-                    }, childCount: appsToShow.length * 2 - 1), )
-                  ],
-                );
-                return ListView.custom(childrenDelegate: SliverChildListDelegate([
-                  ListView.separated(
-                    itemBuilder: (context, index) {
-                      return AppItem(
-                        app: appsToShow[index],
-                        position: index,
-                        onUpvote: () {
-                          _vote(appsToShow[index].id, true);
-                        },
-                        onDownvote: () {
-                          _vote(appsToShow[index].id, false);
-                        },
-                      );
-                    },
-                    itemCount: appsToShow.length,
-                    separatorBuilder: (_, o) => Divider(),
-                  ),
-                ]));
-                return SliverList(delegate: SliverChildListDelegate([
-                  SliverToBoxAdapter(
-                    child: ListView.separated(
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          if (index % 2 == 1) return Divider();
+                          index = (index / 2).floor();
+                          return AppItem(
+                            key: ObjectKey(index),
+                            app: appsToShow[index],
+                            position: index,
+                            onUpvote: () {
+                              _vote(appsToShow[index].id, true);
+                            },
+                            onDownvote: () {
+                              _vote(appsToShow[index].id, false);
+                            },
+                          );
+                        }, childCount: appsToShow.length * 2 - 1),
+                      )
+                    ],
+                  );
+                  return ListView.custom(
+                      childrenDelegate: SliverChildListDelegate([
+                    ListView.separated(
                       itemBuilder: (context, index) {
                         return AppItem(
                           app: appsToShow[index],
@@ -172,26 +166,45 @@ class _RankingPageState extends State<RankingPage> {
                       itemCount: appsToShow.length,
                       separatorBuilder: (_, o) => Divider(),
                     ),
-                  ),
-                ]));
-                return ListView.separated(
-                  itemBuilder: (context, index) {
-                    return AppItem(
-                      app: appsToShow[index],
-                      position: index,
-                      onUpvote: () {
-                        _vote(appsToShow[index].id, true);
-                      },
-                      onDownvote: () {
-                        _vote(appsToShow[index].id, false);
-                      },
-                    );
-                  },
-                  itemCount: appsToShow.length,
-                  separatorBuilder: (_, o) => Divider(),
-                );
-              }
-            ),
+                  ]));
+                  return SliverList(
+                      delegate: SliverChildListDelegate([
+                    SliverToBoxAdapter(
+                      child: ListView.separated(
+                        itemBuilder: (context, index) {
+                          return AppItem(
+                            app: appsToShow[index],
+                            position: index,
+                            onUpvote: () {
+                              _vote(appsToShow[index].id, true);
+                            },
+                            onDownvote: () {
+                              _vote(appsToShow[index].id, false);
+                            },
+                          );
+                        },
+                        itemCount: appsToShow.length,
+                        separatorBuilder: (_, o) => Divider(),
+                      ),
+                    ),
+                  ]));
+                  return ListView.separated(
+                    itemBuilder: (context, index) {
+                      return AppItem(
+                        app: appsToShow[index],
+                        position: index,
+                        onUpvote: () {
+                          _vote(appsToShow[index].id, true);
+                        },
+                        onDownvote: () {
+                          _vote(appsToShow[index].id, false);
+                        },
+                      );
+                    },
+                    itemCount: appsToShow.length,
+                    separatorBuilder: (_, o) => Divider(),
+                  );
+                }),
           ),
         ],
       ),
@@ -208,20 +221,15 @@ class _RankingPageState extends State<RankingPage> {
     network.vote(id, upvote);
   }
 
-
   bool containsAll<E>(Iterable<E> list, Iterable<E> filter) {
-    for(E e in filter) {
-      if(!list.contains(e)) return false;
+    for (E e in filter) {
+      if (!list.contains(e)) return false;
     }
-   return true;
+    return true;
   }
-
 }
 
-
 class _SelectTagPage extends StatefulWidget {
-
-
   _SelectTagPage({Key key, this.possibleTags}) : super(key: key);
 
   final List<Tag> possibleTags;
@@ -233,11 +241,12 @@ class _SelectTagPage extends StatefulWidget {
 class __SelectTagPageState extends State<_SelectTagPage> {
   final TextEditingController textEditingController = TextEditingController();
 
-
   @override
   void initState() {
     super.initState();
-    textEditingController.addListener(() {setState(() {});});
+    textEditingController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -246,9 +255,7 @@ class __SelectTagPageState extends State<_SelectTagPage> {
       appBar: AppBar(
         title: TextField(
           controller: textEditingController,
-          decoration: InputDecoration(
-            hintText: "Start typing a tag"
-          ),
+          decoration: InputDecoration(hintText: "Start typing a tag"),
         ),
       ),
       body: TagList(
@@ -261,4 +268,3 @@ class __SelectTagPageState extends State<_SelectTagPage> {
     );
   }
 }
-

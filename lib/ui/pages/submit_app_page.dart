@@ -1,6 +1,9 @@
 import 'package:discovery_store/data/models.dart';
 import 'package:discovery_store/data/network.dart';
 import 'package:discovery_store/data/network_response.dart';
+import 'package:discovery_store/main.dart';
+import 'package:discovery_store/ui/widgets/tag_chips.dart';
+import 'package:discovery_store/ui/widgets/taggable_scaffold.dart';
 import 'package:flutter/material.dart';
 
 class SubmitAppPage extends StatelessWidget {
@@ -49,7 +52,7 @@ class SubmitAppPage extends StatelessWidget {
         onPressed: () async {
           String text = textEditingController.text;
 
-          ParseAppResponse response = await scraper.getAppInfo(text);
+          ParseAppResponse response = await repository.getAppInfo(text);
           if(!response.success || response.playStoreEntry == null) {
             Scaffold.of(context).showSnackBar(SnackBar(content: Text("Something went wrong (Yes we actually did"
                 " error handling")));
@@ -72,14 +75,30 @@ class SubmitAppPage extends StatelessWidget {
   }
 }
 
-class _ConfirmAndChooseTagsPage extends StatelessWidget {
+class _ConfirmAndChooseTagsPage extends StatefulWidget {
 
   const _ConfirmAndChooseTagsPage({Key key, this.appLink, this.entry}) : super(key: key);
 
   final String appLink;
   final PlayStoreEntry entry;
 
+  @override
+  __ConfirmAndChooseTagsPageState createState() => __ConfirmAndChooseTagsPageState();
+}
 
+class __ConfirmAndChooseTagsPageState extends State<_ConfirmAndChooseTagsPage> {
+
+
+  final TextEditingController textEditingController = TextEditingController();
+
+
+  Set<Tag> tags = Set();
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController.addListener(() {setState(() {});});
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,13 +107,13 @@ class _ConfirmAndChooseTagsPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
+        child: ListView(
           children: <Widget>[
             Hero(
               tag: "_",
               child: Material(
                 child: TextField(
-                  controller: TextEditingController(text: appLink),
+                  controller: TextEditingController(text: widget.appLink),
                   enabled: false,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -105,18 +124,41 @@ class _ConfirmAndChooseTagsPage extends StatelessWidget {
             SizedBox(height: 16,),
             Row(
               children: <Widget>[
-                Image.network("${entry.icon}=s128"),
+                Image.network("${widget.entry.icon}=s128"),
                 SizedBox(width: 16,),
-                Text(entry.title),
+                Text(widget.entry.title),
               ],
             ),
             SizedBox(height: 16,),
-            Text(Uri.decodeFull(entry.description).replaceAll("<br/>", "\n"), maxLines: 8, overflow: TextOverflow.ellipsis,),
-            Spacer(),
+            Text(Uri.decodeFull(widget.entry.description).replaceAll("<br/>", "\n"), maxLines: 8, overflow: TextOverflow.ellipsis,),
+            TextField(
+              controller: textEditingController,
+            ),
+            textEditingController.text.isEmpty? SizedBox():
+                TagList(
+                  input: textEditingController.text,
+                ),
+            TagChips(
+              editable: false,
+              tags: tags.toList(),
+            ),
+            SizedBox(
+              height: 200,
+              child: TagList(
+                onTagSelected: (tag) {
+                  setState(() {
+                    tags.add(tag);
+                  });
+                },
+                possibleTags: TagHolder.getTags(context),
+                input: textEditingController.text,
+              ),
+            ),
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
                 onPressed: () {
+                  network.createApp(widget.appLink, tags.toList());
                 },
                 child: Text("Submit")
               ),

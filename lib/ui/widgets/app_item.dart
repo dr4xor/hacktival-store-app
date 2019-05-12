@@ -32,7 +32,7 @@ class _AppItemState extends State<AppItem> {
   @override
   void initState() {
     super.initState();
-    playStoreEntryFuture = scraper.getAppInfo(widget.app.link);
+    playStoreEntryFuture = repository.getAppInfo(widget.app.link);
   }
 
   double _getHeightFactor() {
@@ -114,12 +114,12 @@ class VoteWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         InkWell(
-          child: Icon(Icons.keyboard_arrow_up),
+          child: Icon(Icons.keyboard_arrow_up, size: 36,),
           onTap: onUpvote,
         ),
         Text(score.toString()),
         InkWell(
-          child: Icon(Icons.keyboard_arrow_down),
+          child: Icon(Icons.keyboard_arrow_down, size: 36,),
           onTap: onDownvote,
         )
       ],
