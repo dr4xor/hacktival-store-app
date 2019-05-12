@@ -33,6 +33,7 @@ class DetailPage extends StatelessWidget {
             iconLink: smalifyLink(entry.icon),
             appName: entry.title,
             id: app.id,
+            ratingScore: app.score,
           ),
           Expanded(
             child: ListView(
@@ -72,9 +73,10 @@ class _HeaderCard extends StatelessWidget {
   final String iconLink;
   final String appName;
 
+  final int ratingScore;
   final int id;
 
-  const _HeaderCard({Key key, @required this.iconLink, @required this.appName, this.id}) : super(key: key);
+  const _HeaderCard({Key key, @required this.iconLink, @required this.appName, this.id, this.ratingScore}) : super(key: key);
 
 
   @override
@@ -85,7 +87,7 @@ class _HeaderCard extends StatelessWidget {
         child: Container(
 
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-        height: 120,
+        height: 128,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -127,7 +129,7 @@ class _HeaderCard extends StatelessWidget {
               ),
             ),
             VoteWidget(
-                score: 1234,
+                score: ratingScore,
             )
           ],
         ),
