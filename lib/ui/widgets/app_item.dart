@@ -44,83 +44,80 @@ class _AppItemState extends State<AppItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: FutureBuilder<ParseAppResponse>(
-            future: playStoreEntryFuture,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (!snapshot.requireData.success) {
-                return Center(
-                  child: Text(
-                      "Ups, something went wrong, (yes we actually did error handling)"),
-                );
-              }
+    return FutureBuilder<ParseAppResponse>(
+        future: playStoreEntryFuture,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (!snapshot.requireData.success) {
+            return Center(
+              child: Text(
+                  "Ups, something went wrong, (yes we actually did error handling)"),
+            );
+          }
 
-              PlayStoreEntry entry = snapshot.requireData.playStoreEntry;
+          PlayStoreEntry entry = snapshot.requireData.playStoreEntry;
 
-              return InkWell(
-                onTap: () async {
-                  await Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
-                    return DetailPage(
-                      entry: entry,
-                      app: widget.app,
-                    );
-                  }));
-                  widget.onNaviagateBack();
-                },
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        VoteWidget(
-                          onDownvote: widget.onDownvote,
-                          onUpvote: widget.onUpvote,
-                          score: widget.app.score,
-                        ),
-                        SizedBox(
-                          width: 16,
-                        ),
-                        Container(
-                          child: Hero(
-                            tag: widget.app.id,
-                            child: Image.network(
-                              smalifyLink(entry.icon),
-                              height: 80 * _getHeightFactor(),
-                            ),
+          return InkWell(
+            onTap: () async {
+              await Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) {
+                return DetailPage(
+                  entry: entry,
+                  app: widget.app,
+                );
+              }));
+              widget.onNaviagateBack();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      VoteWidget(
+                        onDownvote: widget.onDownvote,
+                        onUpvote: widget.onUpvote,
+                        score: widget.app.score,
+                      ),
+                      SizedBox(
+                        width: 16,
+                      ),
+                      Container(
+                        child: Hero(
+                          tag: widget.app.id,
+                          child: Image.network(
+                            smalifyLink(entry.icon),
+                            height: 80 * _getHeightFactor(),
                           ),
                         ),
-                        SizedBox(
-                          width: 16,
-                        ),
-                        Expanded(
-                            child: Text(
-                          entry.title,
-                          maxLines: 3,
-                          style: TextStyle(fontSize: (15 * _getHeightFactor())),
-                        )),
-                      ],
-                    ),
-                    /*Align(
-                    alignment: Alignment.centerLeft,
-                    child: TagChips(
-                      editable: false,
-                      tags: app.tags,
-                    ),
-                  )*/
-                  ],
-                ),
-              );
-            }),
-      ),
-    );
+                      ),
+                      SizedBox(
+                        width: 16,
+                      ),
+                      Expanded(
+                          child: Text(
+                        entry.title,
+                        maxLines: 3,
+                        style: TextStyle(fontSize: (15 * _getHeightFactor())),
+                      )),
+                    ],
+                  ),
+                  /*Align(
+                  alignment: Alignment.centerLeft,
+                  child: TagChips(
+                    editable: false,
+                    tags: app.tags,
+                  ),
+                )*/
+                ],
+              ),
+            ),
+          );
+        });
   }
 }
 
