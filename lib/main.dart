@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:discovery_store/ui/pages/detail_page.dart';
 import 'package:discovery_store/ui/pages/ranking_page.dart';
 import 'package:discovery_store/ui/pages/submit_app_page.dart';
 import 'package:flutter/foundation.dart';

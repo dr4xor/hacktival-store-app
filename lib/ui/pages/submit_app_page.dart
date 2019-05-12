@@ -4,6 +4,7 @@ import 'package:discovery_store/data/network_response.dart';
 import 'package:discovery_store/main.dart';
 import 'package:discovery_store/ui/widgets/tag_chips.dart';
 import 'package:discovery_store/ui/widgets/taggable_scaffold.dart';
+import 'package:discovery_store/utils.dart';
 import 'package:flutter/material.dart';
 
 class SubmitAppPage extends StatelessWidget {
@@ -124,7 +125,7 @@ class __ConfirmAndChooseTagsPageState extends State<_ConfirmAndChooseTagsPage> {
             SizedBox(height: 16,),
             Row(
               children: <Widget>[
-                Image.network("${widget.entry.icon}=s128"),
+                Image.network(smalifyLink(widget.entry.icon)),
                 SizedBox(width: 16,),
                 Text(widget.entry.title),
               ],

@@ -1,5 +1,7 @@
 import 'package:discovery_store/data/models.dart';
 import 'package:discovery_store/ui/widgets/app_item.dart';
+import 'package:discovery_store/ui/widgets/tag_chips.dart';
+import 'package:discovery_store/utils.dart';
 import 'package:flutter/material.dart';
 
 class DetailPage extends StatelessWidget {
@@ -28,8 +30,9 @@ class DetailPage extends StatelessWidget {
       body: Column(
         children: <Widget>[
           _HeaderCard(
-            iconLink: entry.icon,
+            iconLink: smalifyLink(entry.icon),
             appName: entry.title,
+            id: app.id,
           ),
           Expanded(
             child: ListView(
@@ -69,7 +72,9 @@ class _HeaderCard extends StatelessWidget {
   final String iconLink;
   final String appName;
 
-  const _HeaderCard({Key key, @required this.iconLink, @required this.appName}) : super(key: key);
+  final int id;
+
+  const _HeaderCard({Key key, @required this.iconLink, @required this.appName, this.id}) : super(key: key);
 
 
   @override
@@ -87,9 +92,12 @@ class _HeaderCard extends StatelessWidget {
           children: <Widget>[
 
             // Left Align
-            Image.network(
-              iconLink,
-              fit: BoxFit.contain,
+            Hero(
+              tag: id,
+              child: Image.network(
+                iconLink,
+                fit: BoxFit.contain,
+              ),
             ),
 
             SizedBox(
@@ -188,13 +196,9 @@ class _TagsListEntry extends _DetailsListEntry {
 
   @override
   Widget contentColumn(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-
-        Text("Hey", style: Theme.of(context).textTheme.body1,),
-      ],
+    return TagChips(
+      editable: false,
+      tags: tags,
     );
   }
 }

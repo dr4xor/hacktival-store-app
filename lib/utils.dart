@@ -31,3 +31,8 @@ class FadeRoute<T> extends PageRoute<T> {
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
 }
+
+
+String smalifyLink(String url) {
+  return "$url=s128";
+}
