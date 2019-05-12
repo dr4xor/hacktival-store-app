@@ -82,68 +82,73 @@ class _RankingPageState extends State<RankingPage> {
     List<App> appsToShow =
     apps.where((it) => containsAll(it.tags, filter)).toList();
 
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverAppBar(
-          floating: true,
-          snap: true,
-          leading: Icon(Icons.shop),
-          title: Text("Discovery Store",),
-          actions: <Widget>[
-            IconButton(
-                icon: Icon(
-                  Icons.search,
+    return RefreshIndicator(
+      onRefresh: () {
+        refreshApps();
+      },
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            leading: Icon(Icons.shop),
+            title: Text("Discovery Store",),
+            actions: <Widget>[
+              IconButton(
+                  icon: Icon(
+                    Icons.search,
+                  ),
+                  onPressed: () async {
+                    Tag tag = await Navigator.push<Tag>(
+                        context,
+                        FadeRoute<Tag>(
+                            builder: (context) => _SelectTagPage(
+                              possibleTags:
+                              TagHolder.getTags(context),
+                            )));
+                    if (tag == null) return;
+                    filter.add(tag);
+                    setState(() {});
+                  })
+            ],
+            bottom: PreferredSize(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      left: 8, right: 8, bottom: 8),
+                  child: TagChips(
+                    tags: filter.toList(),
+                    editable: true,
+                    onTagsChanged: (it) {
+                      setState(() {
+                        filter = it.toSet();
+                      });
+                    },
+                  ),
                 ),
-                onPressed: () async {
-                  Tag tag = await Navigator.push<Tag>(
-                      context,
-                      FadeRoute<Tag>(
-                          builder: (context) => _SelectTagPage(
-                            possibleTags:
-                            TagHolder.getTags(context),
-                          )));
-                  if (tag == null) return;
-                  filter.add(tag);
-                  setState(() {});
-                })
-          ],
-          bottom: PreferredSize(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 8, right: 8, bottom: 8),
-                child: TagChips(
-                  tags: filter.toList(),
-                  editable: true,
-                  onTagsChanged: (it) {
-                    setState(() {
-                      filter = it.toSet();
-                    });
-                  },
-                ),
-              ),
-              preferredSize: Size(0, filter.isEmpty ? 0 : 56)),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            if (index % 2 == 1) return Divider();
-            index = (index / 2).floor();
-            return AppItem(
-              key: ObjectKey(appsToShow[index].id),
-              app: appsToShow[index],
-              position: index,
-              onNaviagateBack: () {
-                refreshApps();
-              },
-              onUpvote: () {
-                _vote(appsToShow[index].id, true);
-              },
-              onDownvote: () {
-                _vote(appsToShow[index].id, false);
-              },
-            );
-          }, childCount: appsToShow.length * 2 - 1),
-        )
-      ],
+                preferredSize: Size(0, filter.isEmpty ? 0 : 56)),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index % 2 == 1) return Divider();
+              index = (index / 2).floor();
+              return AppItem(
+                key: ObjectKey(appsToShow[index].id),
+                app: appsToShow[index],
+                position: index,
+                onNaviagateBack: () {
+                  refreshApps();
+                },
+                onUpvote: () {
+                  _vote(appsToShow[index].id, true);
+                },
+                onDownvote: () {
+                  _vote(appsToShow[index].id, false);
+                },
+              );
+            }, childCount: appsToShow.length * 2 - 1),
+          )
+        ],
+      ),
     );
 
   }
