@@ -34,6 +34,7 @@ class DetailPage extends StatelessWidget {
             appName: entry.title,
             id: app.id,
             ratingScore: app.score,
+            price: entry.price,
           ),
           Expanded(
             child: ListView(
@@ -72,12 +73,20 @@ class _HeaderCard extends StatelessWidget {
 
   final String iconLink;
   final String appName;
-
+  final String price;
   final int ratingScore;
   final int id;
 
-  const _HeaderCard({Key key, @required this.iconLink, @required this.appName, this.id, this.ratingScore}) : super(key: key);
+  const _HeaderCard({Key key, @required this.iconLink, @required this.appName, this.id, this.ratingScore, this.price}) : super(key: key);
 
+  String _get_price_tag() {
+
+    if (price == "0") {
+      return "FREE";
+    }
+
+    return price;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,24 +116,30 @@ class _HeaderCard extends StatelessWidget {
             ),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
                     appName,
-                    overflow: TextOverflow.fade,
+                    overflow: TextOverflow.ellipsis,
                     softWrap: true,
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold
                     ),
+                    maxLines: 2,
                   ),
-                  /*
-                SizedBox(
-                  height: 5,
-                ),
-                Text("Bliblablub")
-                */
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    _get_price_tag(),
+                    style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      color: Colors.grey
+                    ),
+                  )
                 ],
               ),
             ),
@@ -150,7 +165,7 @@ abstract class _DetailsListEntry extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         decoration: BoxDecoration(
             border: Border(
                 bottom: BorderSide(color: Colors.black12, width: 1)
