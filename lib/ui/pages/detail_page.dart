@@ -1,4 +1,5 @@
 import 'package:discovery_store/data/models.dart';
+import 'package:discovery_store/data/network.dart';
 import 'package:discovery_store/ui/widgets/app_item.dart';
 import 'package:discovery_store/ui/widgets/tag_chips.dart';
 import 'package:discovery_store/utils.dart';
@@ -73,7 +74,7 @@ class DetailPage extends StatelessWidget {
   }
 }
 
-class _HeaderCard extends StatelessWidget {
+class _HeaderCard extends StatefulWidget {
 
   final String iconLink;
   final String appName;
@@ -83,13 +84,26 @@ class _HeaderCard extends StatelessWidget {
 
   const _HeaderCard({Key key, @required this.iconLink, @required this.appName, this.id, this.ratingScore, this.price}) : super(key: key);
 
+  @override
+  __HeaderCardState createState() => __HeaderCardState();
+}
+
+class __HeaderCardState extends State<_HeaderCard> {
   String _get_price_tag() {
 
-    if (price == "0") {
+    if (widget.price == "0") {
       return "FREE";
     }
 
-    return price;
+    return widget.price;
+  }
+
+  int score;
+
+  @override
+  void initState() {
+    super.initState();
+    score = widget.ratingScore;
   }
 
   @override
@@ -108,9 +122,9 @@ class _HeaderCard extends StatelessWidget {
 
             // Left Align
             Hero(
-              tag: id,
+              tag: widget.id,
               child: Image.network(
-                iconLink,
+                widget.iconLink,
                 fit: BoxFit.contain,
               ),
             ),
@@ -124,7 +138,7 @@ class _HeaderCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    appName,
+                    widget.appName,
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
                     style: TextStyle(
@@ -148,12 +162,22 @@ class _HeaderCard extends StatelessWidget {
               ),
             ),
             VoteWidget(
-                score: ratingScore,
+              score: score,
+              onUpvote: () => vote(true),
+              onDownvote: () => vote(false),
             )
           ],
         ),
       ),
     );
+  }
+
+
+  void vote(bool up) {
+    network.vote(widget.id, up);
+    setState(() {
+      score += up? 1: -1;
+    });
   }
 }
 
