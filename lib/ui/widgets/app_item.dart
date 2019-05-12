@@ -78,13 +78,16 @@ class _AppItemState extends State<AppItem> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
+                      SizedBox(
+                        width: 3,
+                      ),
                       VoteWidget(
                         onDownvote: widget.onDownvote,
                         onUpvote: widget.onUpvote,
                         score: widget.app.score,
                       ),
                       SizedBox(
-                        width: 16,
+                        width: 12,
                       ),
                       Container(
                         child: Hero(
