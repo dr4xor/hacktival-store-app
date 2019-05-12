@@ -19,9 +19,12 @@ class _RankingPageState extends State<RankingPage> {
 
   Set<Tag> filter = Set();
 
-  Future<GetAllAppsResponse> allApps;
+
+  List<App> apps;
 
   bool canOpenTagSelector = false;
+
+  bool error = false;
 
   @override
   void initState() {
@@ -29,164 +32,122 @@ class _RankingPageState extends State<RankingPage> {
     textEditingController.addListener(() {
       setState(() {});
     });
-    allApps = network.getAllApps();
+    refreshApps();
   }
 
+
+  void refreshApps() {
+    network.getAllApps().then((it) {
+      if(!it.success) {
+        error = true;
+      } else {
+        apps = it.apps;
+      }
+      setState(() {});
+    });
+  }
+
+
+  Widget getContent() {
+    if(error) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+                "Ups, something went wrong (yes we did error handling)"),
+            MaterialButton(
+              onPressed: () {
+                refreshApps();
+              },
+              child: Text("Try again"),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if(apps == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+
+    List<App> appsToShow =
+    apps.where((it) => containsAll(it.tags, filter)).toList();
+
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAppBar(
+          floating: true,
+          snap: true,
+          title: Text("Discovery Store",),
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(
+                  Icons.search,
+                ),
+                onPressed: () async {
+                  Tag tag = await Navigator.push<Tag>(
+                      context,
+                      FadeRoute<Tag>(
+                          builder: (context) => _SelectTagPage(
+                            possibleTags:
+                            TagHolder.getTags(context),
+                          )));
+                  if (tag == null) return;
+                  filter.add(tag);
+                  setState(() {});
+                })
+          ],
+          bottom: PreferredSize(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 8, right: 8, bottom: 8),
+                child: TagChips(
+                  tags: filter.toList(),
+                  editable: true,
+                  onTagsChanged: (it) {
+                    setState(() {
+                      filter = it.toSet();
+                    });
+                  },
+                ),
+              ),
+              preferredSize: Size(0, filter.isEmpty ? 0 : 56)),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            if (index % 2 == 1) return Divider();
+            index = (index / 2).floor();
+            return AppItem(
+              key: ObjectKey(index),
+              app: appsToShow[index],
+              position: index,
+              onNaviagateBack: () {
+                refreshApps();
+              },
+              onUpvote: () {
+                _vote(appsToShow[index].id, true);
+              },
+              onDownvote: () {
+                _vote(appsToShow[index].id, false);
+              },
+            );
+          }, childCount: appsToShow.length * 2 - 1),
+        )
+      ],
+    );
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
           Expanded(
-            child: FutureBuilder<GetAllAppsResponse>(
-                future: allApps,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (!snapshot.data.success) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                              "Ups, something went wrong (yes we did error handling)"),
-                          MaterialButton(
-                            onPressed: () {
-                              setState(() {
-                                allApps = network.getAllApps();
-                              });
-                            },
-                            child: Text("Try again"),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  List<App> apps = snapshot.requireData.apps;
-
-                  List<App> appsToShow =
-                      apps.where((it) => containsAll(it.tags, filter)).toList();
-
-                  return CustomScrollView(
-                    slivers: <Widget>[
-                      SliverAppBar(
-                        floating: true,
-                        snap: true,
-                        title: Text("Discovery Store",),
-                        actions: <Widget>[
-                          IconButton(
-                              icon: Icon(
-                                Icons.search,
-                              ),
-                              onPressed: () async {
-                                Tag tag = await Navigator.push<Tag>(
-                                    context,
-                                    FadeRoute<Tag>(
-                                        builder: (context) => _SelectTagPage(
-                                              possibleTags:
-                                                  TagHolder.getTags(context),
-                                            )));
-                                if (tag == null) return;
-                                filter.add(tag);
-                                setState(() {});
-                              })
-                        ],
-                        bottom: PreferredSize(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 8, right: 8, bottom: 8),
-                              child: TagChips(
-                                tags: filter.toList(),
-                                editable: true,
-                                onTagsChanged: (it) {
-                                  setState(() {
-                                    filter = it.toSet();
-                                  });
-                                },
-                              ),
-                            ),
-                            preferredSize: Size(0, filter.isEmpty ? 0 : 56)),
-                      ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          if (index % 2 == 1) return Divider();
-                          index = (index / 2).floor();
-                          return AppItem(
-                            key: ObjectKey(index),
-                            app: appsToShow[index],
-                            position: index,
-                            onUpvote: () {
-                              _vote(appsToShow[index].id, true);
-                            },
-                            onDownvote: () {
-                              _vote(appsToShow[index].id, false);
-                            },
-                          );
-                        }, childCount: appsToShow.length * 2 - 1),
-                      )
-                    ],
-                  );
-                  return ListView.custom(
-                      childrenDelegate: SliverChildListDelegate([
-                    ListView.separated(
-                      itemBuilder: (context, index) {
-                        return AppItem(
-                          app: appsToShow[index],
-                          position: index,
-                          onUpvote: () {
-                            _vote(appsToShow[index].id, true);
-                          },
-                          onDownvote: () {
-                            _vote(appsToShow[index].id, false);
-                          },
-                        );
-                      },
-                      itemCount: appsToShow.length,
-                      separatorBuilder: (_, o) => Divider(),
-                    ),
-                  ]));
-                  return SliverList(
-                      delegate: SliverChildListDelegate([
-                    SliverToBoxAdapter(
-                      child: ListView.separated(
-                        itemBuilder: (context, index) {
-                          return AppItem(
-                            app: appsToShow[index],
-                            position: index,
-                            onUpvote: () {
-                              _vote(appsToShow[index].id, true);
-                            },
-                            onDownvote: () {
-                              _vote(appsToShow[index].id, false);
-                            },
-                          );
-                        },
-                        itemCount: appsToShow.length,
-                        separatorBuilder: (_, o) => Divider(),
-                      ),
-                    ),
-                  ]));
-                  return ListView.separated(
-                    itemBuilder: (context, index) {
-                      return AppItem(
-                        app: appsToShow[index],
-                        position: index,
-                        onUpvote: () {
-                          _vote(appsToShow[index].id, true);
-                        },
-                        onDownvote: () {
-                          _vote(appsToShow[index].id, false);
-                        },
-                      );
-                    },
-                    itemCount: appsToShow.length,
-                    separatorBuilder: (_, o) => Divider(),
-                  );
-                }),
+            child: getContent(),
           ),
         ],
       ),
@@ -202,6 +163,9 @@ class _RankingPageState extends State<RankingPage> {
 
   _vote(int id, bool upvote) {
     network.vote(id, upvote);
+    setState(() {
+      apps.firstWhere((it) => it.id == id).score += upvote? 1: -1;
+    });
   }
 
   bool containsAll<E>(Iterable<E> list, Iterable<E> filter) {

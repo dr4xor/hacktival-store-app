@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 class AppItem extends StatefulWidget {
   const AppItem(
-      {Key key, this.position, this.app, this.onUpvote, this.onDownvote})
+      {Key key, this.position, this.app, this.onUpvote, this.onDownvote, this.onNaviagateBack})
       : super(key: key);
 
   /// For the size of of the item
@@ -20,6 +20,9 @@ class AppItem extends StatefulWidget {
 
   final VoidCallback onUpvote;
   final VoidCallback onDownvote;
+
+
+  final VoidCallback onNaviagateBack;
 
   @override
   _AppItemState createState() => _AppItemState();
@@ -35,6 +38,7 @@ class _AppItemState extends State<AppItem> {
   }
 
   double _getHeightFactor() {
+    return 1.0;
     return (max(0, 3 - widget.position) * 0.2) + 1;
   }
 
@@ -62,14 +66,15 @@ class _AppItemState extends State<AppItem> {
               PlayStoreEntry entry = snapshot.requireData.playStoreEntry;
 
               return InkWell(
-                onTap: () {
-                  Navigator.of(context)
+                onTap: () async {
+                  await Navigator.of(context)
                       .push(MaterialPageRoute(builder: (context) {
                     return DetailPage(
                       entry: entry,
                       app: widget.app,
                     );
                   }));
+                  widget.onNaviagateBack();
                 },
                 child: Column(
                   children: <Widget>[
