@@ -3,6 +3,8 @@ import 'package:discovery_store/ui/widgets/app_item.dart';
 import 'package:discovery_store/ui/widgets/tag_chips.dart';
 import 'package:discovery_store/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share/share.dart';
 
 class DetailPage extends StatelessWidget {
 
@@ -59,11 +61,13 @@ class DetailPage extends StatelessWidget {
   }
 
   void onSharePressed() {
-
+    Share.share(app.link);
   }
 
-  void onOpenStorePressed() {
-
+  void onOpenStorePressed() async {
+    if(await canLaunch(app.link)) {
+      launch(app.link);
+    }
   }
 }
 

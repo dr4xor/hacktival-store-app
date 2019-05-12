@@ -111,20 +111,6 @@ class _RankingPageState extends State<RankingPage> {
                             ),
                             preferredSize: Size(0, filter.isEmpty ? 0 : 56)),
                       ),
-                      SliverToBoxAdapter(
-                        child: Container(
-                          decoration: BoxDecoration(border: Border.all()),
-                          height: 64,
-                          alignment: Alignment.center,
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          child: Text(
-                            "Check out the top apps of the day!",
-                            style: TextStyle(
-                              fontSize: 22,
-                            ),
-                          ),
-                        ),
-                      ),
                       SliverList(
                         delegate: SliverChildBuilderDelegate((context, index) {
                           if (index % 2 == 1) return Divider();

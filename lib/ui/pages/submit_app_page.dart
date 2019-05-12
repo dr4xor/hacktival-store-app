@@ -158,8 +158,9 @@ class __ConfirmAndChooseTagsPageState extends State<_ConfirmAndChooseTagsPage> {
             SizedBox(
               width: double.infinity,
               child: RaisedButton(
-                onPressed: () {
+                onPressed: () async {
                   network.createApp(widget.appLink, tags.toList());
+                  Navigator.of(context).pushReplacementNamed('ranking_page');
                 },
                 child: Text("Submit")
               ),
