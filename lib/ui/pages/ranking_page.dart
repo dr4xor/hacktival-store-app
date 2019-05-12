@@ -43,10 +43,15 @@ class _RankingPageState extends State<RankingPage> {
       } else {
         apps = it.apps;
       }
+      sort();
       setState(() {});
     });
   }
 
+
+  void sort() {
+    apps.sort();
+  }
 
   Widget getContent() {
     if(error) {
@@ -123,7 +128,7 @@ class _RankingPageState extends State<RankingPage> {
             if (index % 2 == 1) return Divider();
             index = (index / 2).floor();
             return AppItem(
-              key: ObjectKey(index),
+              key: ObjectKey(appsToShow[index].id),
               app: appsToShow[index],
               position: index,
               onNaviagateBack: () {
@@ -166,6 +171,7 @@ class _RankingPageState extends State<RankingPage> {
     network.vote(id, upvote);
     setState(() {
       apps.firstWhere((it) => it.id == id).score += upvote? 1: -1;
+      sort();
     });
   }
 

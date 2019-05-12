@@ -1,4 +1,4 @@
-class App{
+class App implements Comparable<App>{
   int id;
   String link;
   int score;
@@ -37,6 +37,13 @@ class App{
       data['tags'] = this.tags.map((v) => v.toJson()).toList();
     }
     return data;
+  }
+
+  @override
+  int compareTo(App other) {
+    if(score > other.score) return -1;
+    if(score < other.score) return 1;
+    return 0;
   }
 }
 
