@@ -13,6 +13,15 @@ class DetailPage extends StatelessWidget {
 
   const DetailPage({Key key, @required this.app, @required this.entry}) : super(key: key);
 
+  String _get_price_tag() {
+
+    if (entry.price == "0") {
+      return "FREE";
+    }
+
+    return entry.price;
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -52,12 +61,13 @@ class DetailPage extends StatelessWidget {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           onOpenStorePressed();
         },
         tooltip: "Go to Play Store",
-        child: Icon(Icons.shop),
+        icon: Icon(Icons.shop),
+        label: Text(_get_price_tag()),
       ),
     );
   }

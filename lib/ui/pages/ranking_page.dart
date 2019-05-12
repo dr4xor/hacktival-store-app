@@ -190,11 +190,12 @@ class _RankingPageState extends State<RankingPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).pushNamed("submit_app");
         },
-        child: Icon(Icons.add),
+        icon: Icon(Icons.add),
+        label: Text("Submit App"),
       ),
     );
   }
