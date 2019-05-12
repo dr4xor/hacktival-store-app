@@ -23,7 +23,6 @@ class _RankingPageState extends State<RankingPage> {
 
   bool canOpenTagSelector = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -31,7 +30,6 @@ class _RankingPageState extends State<RankingPage> {
       setState(() {});
     });
     allApps = network.getAllApps();
-
   }
 
   @override
@@ -76,31 +74,31 @@ class _RankingPageState extends State<RankingPage> {
                   return CustomScrollView(
                     slivers: <Widget>[
                       SliverAppBar(
-                        backgroundColor: Colors.white,
                         floating: true,
                         snap: true,
-                        title: Text("Home", style: TextStyle(color: Colors.black),),
+                        title: Text("Discovery Store",),
                         actions: <Widget>[
-                          canOpenTagSelector
-                              ? IconButton(
-                                  icon: Icon(Icons.search, color: Colors.black,),
-                                  onPressed: () async {
-                                    Tag tag = await Navigator.push<Tag>(
-                                        context,
-                                        FadeRoute<Tag>(
-                                            builder: (context) =>
-                                                _SelectTagPage(
-                                                  possibleTags: TagHolder.getTags(context),
-                                                )));
-                                    if (tag == null) return;
-                                    filter.add(tag);
-                                    setState(() {});
-                                  })
-                              : SizedBox()
+                          IconButton(
+                              icon: Icon(
+                                Icons.search,
+                              ),
+                              onPressed: () async {
+                                Tag tag = await Navigator.push<Tag>(
+                                    context,
+                                    FadeRoute<Tag>(
+                                        builder: (context) => _SelectTagPage(
+                                              possibleTags:
+                                                  TagHolder.getTags(context),
+                                            )));
+                                if (tag == null) return;
+                                filter.add(tag);
+                                setState(() {});
+                              })
                         ],
                         bottom: PreferredSize(
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                              padding: const EdgeInsets.only(
+                                  left: 8, right: 8, bottom: 8),
                               child: TagChips(
                                 tags: filter.toList(),
                                 editable: true,
@@ -111,13 +109,11 @@ class _RankingPageState extends State<RankingPage> {
                                 },
                               ),
                             ),
-                            preferredSize: Size(0, filter.isEmpty? 0:56)),
+                            preferredSize: Size(0, filter.isEmpty ? 0 : 56)),
                       ),
                       SliverToBoxAdapter(
                         child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all()
-                          ),
+                          decoration: BoxDecoration(border: Border.all()),
                           height: 64,
                           alignment: Alignment.center,
                           margin: const EdgeInsets.only(bottom: 16.0),

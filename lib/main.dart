@@ -74,6 +74,7 @@ class _MyAppState extends State<MyApp> {
           child: MaterialApp(
             title: 'Flutter Demo',
             theme: new ThemeData(
+              brightness: Brightness.dark,
               primarySwatch: Colors.blue,
             ),
             home: RankingPage(),
